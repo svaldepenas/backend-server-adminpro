@@ -1,0 +1,153 @@
+var express = require('express');
+var bcrypt = require('bcryptjs');
+var jwt = require('jsonwebtoken');
+
+// Import middleware verifyToken
+var mdAuthentication = require('../middlewares/authentication');
+
+// Initialize app
+var app = express();
+
+// Import User Schema
+var User = require('../models/user');
+
+// ==========================================
+//              GET ALL USERS
+// ==========================================
+app.get('/', (req, res, next) => {
+    User.find({}, 'name email img role')
+        .exec(
+            (err, userCollection) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        message: 'Error getting users.',
+                        errors: err
+                    });
+                }
+
+                res.status(200).json({
+                    ok: true,
+                    users: userCollection
+                });
+            }
+        );
+});
+
+// ==========================================
+//              UPDATE USER
+// ==========================================
+app.put('/:id', mdAuthentication.verifyToken, (req, res) => {
+    var id = req.params.id;
+
+    User.findById(id, (err, findUser) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                message: 'Error finding user.',
+                errors: err
+            });
+        }
+
+        if (!findUser) {
+            return res.status(400).json({
+                ok: false,
+                message: 'User whith id ' + id + ' does not exist.',
+                errors: { message: 'User whit this Id does not exist.' }
+            });
+        }
+
+        var body = req.body;
+        findUser.name = body.name;
+        findUser.surnmae = body.surnmae;
+        findUser.email = body.email;
+        // findUser.username = body.username;
+        findUser.role = body.role;
+
+        findUser.save((err, userSaved) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    message: 'Error updating user.',
+                    errors: err
+                });
+            }
+
+            userSaved.password = ':)';
+
+            res.status(200).json({
+                ok: true,
+                user: userSaved
+            });
+        });
+
+    });
+});
+
+// ==========================================
+//              CREATE NEW USER
+// ==========================================
+app.post('/', mdAuthentication.verifyToken, (req, res) => {
+    var body = req.body;
+
+    var user = new User({
+        name: body.name,
+        surname: body.surname,
+        email: body.email,
+        // username: body.username,
+        password: bcrypt.hashSync(body.password, 10),
+        img: body.img,
+        role: body.role
+    });
+
+    user.save((err, userSaved) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                message: 'Error creating user.',
+                errors: err
+            });
+        }
+
+        res.status(201).json({
+            ok: true,
+            user: userSaved,
+            userToken: req.user
+        });
+    });
+
+});
+
+// ==========================================
+//              DELETE USER
+// ==========================================
+app.delete('/:id', mdAuthentication.verifyToken, (req, res) => {
+    var id = req.params.id;
+
+    User.findByIdAndRemove(id, (err, userDeleted) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                message: 'Error deleting user.',
+                errors: err
+            });
+        }
+
+        if (!userDeleted) {
+            return res.status(400).json({
+                ok: false,
+                message: 'User whith id ' + id + ' does not exist.',
+                errors: { message: 'User whit this Id does not exist.' }
+            });
+        }
+
+        userDeleted.password = ':)';
+
+        res.status(200).json({
+            ok: true,
+            user: userDeleted
+        });
+    })
+})
+
+module.exports = app;
