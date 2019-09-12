@@ -15,7 +15,13 @@ var User = require('../models/user');
 //              GET ALL USERS
 // ==========================================
 app.get('/', (req, res, next) => {
+
+    var since = req.query.since || 0;
+    since = Number(since);
+
     User.find({}, 'name email img role')
+        .skip(since)
+        .limit(5)
         .exec(
             (err, userCollection) => {
                 if (err) {
@@ -26,10 +32,24 @@ app.get('/', (req, res, next) => {
                     });
                 }
 
-                res.status(200).json({
-                    ok: true,
-                    users: userCollection
+                User.countDocuments({}, (err, count) => {
+
+                    if (err) {
+                        return res.status(500).json({
+                            ok: false,
+                            message: 'Error getting users count.',
+                            errors: err
+                        });
+                    }
+
+                    res.status(200).json({
+                        ok: true,
+                        countUsers: count,
+                        users: userCollection
+                    });
                 });
+
+
             }
         );
 });

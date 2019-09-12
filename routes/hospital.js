@@ -13,7 +13,14 @@ var Hospital = require('../models/hospital');
 //              GET ALL HOSPITALS
 // ==========================================
 app.get('/', (req, res, next) => {
+
+    var since = req.query.since || 0;
+    since = Number(since);
+
     Hospital.find({})
+        .skip(since)
+        .limit(5)
+        .populate('user', 'name email')
         .exec(
             (err, hospitalCollection) => {
                 if (err) {
@@ -24,9 +31,21 @@ app.get('/', (req, res, next) => {
                     });
                 }
 
-                res.status(200).json({
-                    ok: true,
-                    hospitals: hospitalCollection
+                Hospital.countDocuments({}, (err, count) => {
+
+                    if (err) {
+                        return res.status(500).json({
+                            ok: false,
+                            message: 'Error getting hospitals count.',
+                            errors: err
+                        });
+                    }
+
+                    res.status(200).json({
+                        ok: true,
+                        countHospitals: count,
+                        hospitals: hospitalCollection
+                    });
                 });
             }
         );

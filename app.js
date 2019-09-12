@@ -9,6 +9,9 @@ var userRoutes = require('./routes/user');
 var loginRoutes = require('./routes/login');
 var hospitalRoutes = require('./routes/hospital');
 var doctorRoutes = require('./routes/doctor');
+var findRoutes = require('./routes/find');
+var uploadRoutes = require('./routes/upload');
+var imagesRoutes = require('./routes/images');
 
 
 // Initialize variables
@@ -28,11 +31,19 @@ mongoose
     .then(() => console.log('Database: \x1b[32m%s\x1b[0m', 'CONNECTED'))
     .catch(err => console.log(err));
 
+// Server index config: to show pictures on web
+// var serveIndex = require('serve-index');
+// app.use(express.static(__dirname + '/'))
+// app.use('/uploads', serveIndex(__dirname + '/uploads'));
+
 // Routes (Middleware)
 app.use('/user', userRoutes);
-app.use('/login', loginRoutes);
 app.use('/hospital', hospitalRoutes);
 app.use('/doctor', doctorRoutes);
+app.use('/find', findRoutes);
+app.use('/upload', uploadRoutes);
+app.use('/images', imagesRoutes);
+app.use('/login', loginRoutes);
 app.use('/', appRoutes);
 
 // Listen

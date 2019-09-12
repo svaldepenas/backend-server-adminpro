@@ -13,7 +13,15 @@ var Doctor = require('../models/doctor');
 //              GET ALL DOCTOR
 // ==========================================
 app.get('/', (req, res, next) => {
+
+    var since = req.query.since || 0;
+    since = Number(since);
+
     Doctor.find({})
+        .skip(since)
+        .limit(5)
+        .populate('user', 'name email')
+        .populate('hospital')
         .exec(
             (err, doctorCollection) => {
                 if (err) {
@@ -24,9 +32,21 @@ app.get('/', (req, res, next) => {
                     });
                 }
 
-                res.status(200).json({
-                    ok: true,
-                    doctors: doctorCollection
+                Doctor.countDocuments({}, (err, count) => {
+
+                    if (err) {
+                        return res.status(500).json({
+                            ok: false,
+                            message: 'Error getting doctors count.',
+                            errors: err
+                        });
+                    }
+
+                    res.status(200).json({
+                        ok: true,
+                        countDoctors: count,
+                        doctors: doctorCollection
+                    });
                 });
             }
         );
