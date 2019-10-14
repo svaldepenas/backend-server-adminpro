@@ -18,7 +18,8 @@ var userSchema = new Schema({
     // username: { type: String, unique: true, required: [true, 'El usuario es obligatorio.'] },
     password: { type: String, required: [true, 'La contraseña es obligatoria.'] },
     img: { type: String, required: false },
-    role: { type: String, default: 'USER_ROLE', required: true, enum: validateRoles }
+    role: { type: String, default: 'USER_ROLE', required: true, enum: validateRoles },
+    google: { type: Boolean, default: false }
 });
 
 // Add Mongoose Unique Validator for pretty message
