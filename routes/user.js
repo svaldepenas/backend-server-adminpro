@@ -18,8 +18,10 @@ app.get('/', (req, res, next) => {
 
     var since = req.query.since || 0;
     since = Number(since);
+    console.log(since);
 
-    User.find({}, 'name email img role')
+
+    User.find({}, 'name email img role google')
         .skip(since)
         .limit(5)
         .exec(
@@ -79,7 +81,7 @@ app.put('/:id', mdAuthentication.verifyToken, (req, res) => {
 
         var body = req.body;
         findUser.name = body.name;
-        findUser.surnmae = body.surnmae;
+        findUser.surname = body.surname;
         findUser.email = body.email;
         // findUser.username = body.username;
         findUser.role = body.role;
@@ -107,7 +109,7 @@ app.put('/:id', mdAuthentication.verifyToken, (req, res) => {
 // ==========================================
 //              CREATE NEW USER
 // ==========================================
-app.post('/', mdAuthentication.verifyToken, (req, res) => {
+app.post('/', (req, res) => {
     var body = req.body;
 
     var user = new User({
