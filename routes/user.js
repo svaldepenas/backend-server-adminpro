@@ -18,10 +18,8 @@ app.get('/', (req, res, next) => {
 
     var since = req.query.since || 0;
     since = Number(since);
-    console.log(since);
 
-
-    User.find({}, 'name email img role google')
+    User.find({}, 'name surname email img role google')
         .skip(since)
         .limit(5)
         .exec(
