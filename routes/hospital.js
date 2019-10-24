@@ -10,17 +10,88 @@ var app = express();
 var Hospital = require('../models/hospital');
 
 // ==========================================
-//              GET ALL HOSPITALS
+//           GET HOSPITAL BY ID
+// ==========================================
+app.get('/:id', (req, res, next) => {
+    var id = req.params.id;
+
+    Hospital.findById(id)
+        .populate('user', 'name img email')
+        .exec((err, hospital) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    message: 'Error finding hospital',
+                    errors: err
+                });
+            }
+
+            if (!hospital) {
+                return res.status(400).json({
+                    ok: false,
+                    message: 'Hospital with id : ' + id + ' does not exist',
+                    errors: { message: 'Hospital does not exist' }
+                });
+            }
+
+            return res.status(200).json({
+                ok: true,
+                hospital: hospital
+            });
+        })
+})
+
+// ==========================================
+//          GET ALL HOSPITALS
+// ==========================================
+app.get('/all/:all', (req, res, next) => {
+
+    Hospital.find({})
+        .populate('user', 'name email img')
+        .exec(
+            (err, hospitalCollection) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        message: 'Error getting hospitals.',
+                        errors: err
+                    });
+                }
+
+                Hospital.countDocuments({}, (err, count) => {
+
+                    if (err) {
+                        return res.status(500).json({
+                            ok: false,
+                            message: 'Error getting hospitals count.',
+                            errors: err
+                        });
+                    }
+
+                    res.status(200).json({
+                        ok: true,
+                        countHospitals: count,
+                        hospitals: hospitalCollection
+                    });
+                });
+            }
+        );
+});
+
+// ==========================================
+//      GET ALL HOSPITALS PAGINATIOM
 // ==========================================
 app.get('/', (req, res, next) => {
 
     var since = req.query.since || 0;
     since = Number(since);
+    console.log(since);
+
 
     Hospital.find({})
         .skip(since)
         .limit(5)
-        .populate('user', 'name email')
+        .populate('user', 'name email img')
         .exec(
             (err, hospitalCollection) => {
                 if (err) {

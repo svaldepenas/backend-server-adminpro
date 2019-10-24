@@ -53,6 +53,46 @@ app.get('/', (req, res, next) => {
 });
 
 // ==========================================
+//              GET DOCTOR
+// ==========================================
+app.get('/:id', (req, res, next) => {
+
+    var id = req.params.id;
+
+    Doctor.findById(id)
+        .populate('user', 'name email img')
+        .populate('hospital')
+        .exec(
+            (err, doctor) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        message: 'Error getting doctors.',
+                        errors: err
+                    });
+                }
+
+                Doctor.countDocuments({}, (err, count) => {
+
+                    if (err) {
+                        return res.status(500).json({
+                            ok: false,
+                            message: 'Error getting doctors count.',
+                            errors: err
+                        });
+                    }
+
+                    res.status(200).json({
+                        ok: true,
+                        countDoctors: count,
+                        doctor: doctor
+                    });
+                });
+            }
+        );
+});
+
+// ==========================================
 //              UPDATE DOCTOR
 // ==========================================
 app.put('/:id', mdAuthentication.verifyToken, (req, res) => {

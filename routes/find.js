@@ -74,7 +74,7 @@ app.get('/collection/:table/:param', (req, res, next) => {
 function findHospitals(findParam, regex) {
     return new Promise((resolve, reject) => {
         Hospital.find({ name: regex })
-            .populate('user', 'name email')
+            .populate('user', 'name email img')
             .exec((err, hospitalCollection) => {
                 if (err) {
                     reject('Error al buscar hospitales ', err);
