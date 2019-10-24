@@ -88,7 +88,7 @@ function findHospitals(findParam, regex) {
 function findDoctors(findParam, regex) {
     return new Promise((resolve, reject) => {
         Doctor.find({ name: regex })
-            .populate('user', 'name email')
+            .populate('user', 'name email img')
             .populate('hospital')
             .exec((err, doctorCollection) => {
                 if (err) {
